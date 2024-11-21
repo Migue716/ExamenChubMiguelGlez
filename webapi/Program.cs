@@ -1,5 +1,4 @@
 using System.Data;
-using System.Data.Entity;
 using System.Data.SQLite;
 
 // Crear y configurar el builder de la aplicación
