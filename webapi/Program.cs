@@ -5,12 +5,22 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.WithOrigins("http://localhost:5173", "https://localhost:5173")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException(
-        "Falta ConnectionStrings:DefaultConnection. Config˙ralo en appsettings.json o en variables de entorno.");
+        "Falta ConnectionStrings:DefaultConnection. Configùralo en appsettings.json o en variables de entorno.");
 
 using (var bootstrapConnection = new SqlConnection(connectionString))
 {
@@ -26,6 +36,7 @@ builder.Services.AddScoped<ClienteService>();
 var app = builder.Build();
 
 app.UseHttpsRedirection();
+app.UseCors();
 app.UseAuthorization();
 
 if (app.Environment.IsDevelopment())

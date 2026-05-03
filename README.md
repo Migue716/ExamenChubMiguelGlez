@@ -1,10 +1,11 @@
 # ExamenChub — API de clientes con SQL Server
 
-Solución .NET 8 que expone una **API REST** para gestionar **clientes** (altas, consultas, actualización, borrado y búsqueda) persistiendo datos en **Microsoft SQL Server**. Incluye una **aplicación Windows Forms** de ejemplo que consume la API.
+Solución .NET 8 que expone una **API REST** para gestionar **clientes** (altas, consultas, actualización, borrado y búsqueda) persistiendo datos en **Microsoft SQL Server**. Incluye un **cliente web React (Vite + TypeScript)** en la carpeta `client` que consume la API.
 
 ## Requisitos
 
 - [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+- [Node.js](https://nodejs.org/) (LTS recomendado) para el cliente React
 - **SQL Server** accesible desde tu máquina, por ejemplo:
   - [SQL Server Express LocalDB](https://learn.microsoft.com/sql/database-engine/configure-windows/sql-server-express-localdb) (incluido con Visual Studio y muchas cargas de trabajo de datos), o
   - SQL Server / Azure SQL con cadena de conexión válida
@@ -13,8 +14,8 @@ Solución .NET 8 que expone una **API REST** para gestionar **clientes** (altas,
 
 | Proyecto | Descripción |
 |----------|-------------|
-| **webapi** | ASP.NET Core Web API: controladores, servicio de negocio, repositorio con **Dapper** y **Microsoft.Data.SqlClient**. Swagger en entorno **Development**. |
-| **CapaPresentacion** | Cliente WinForms (`Demo`) que llama a los endpoints HTTP de la API. |
+| **webapi** | ASP.NET Core Web API: controladores, servicio de negocio, repositorio con **Dapper** y **Microsoft.Data.SqlClient**. Swagger en entorno **Development**. CORS permitido para `http(s)://localhost:5173` (Vite). |
+| **client** | React + Vite + TypeScript: llama al API en **`https://localhost:44309`** (`VITE_API_URL` en `client/.env`). *Proxy* de respaldo en `vite.config.ts` al mismo host. |
 
 Capas en la API (orden conceptual):
 
@@ -83,15 +84,29 @@ Asegúrate de que la cadena de conexión apunte a un SQL Server en ejecución. E
 | `DELETE` | `/api/Clientes/{id}` | Elimina |
 | `GET` | `/api/Clientes/search?nombre=&correoElectronico=` | Búsqueda por coincidencia parcial |
 
-## Cómo ejecutar el cliente Windows Forms
+## Cómo ejecutar el cliente React
 
-1. Arranca la API (puerto HTTPS según `webapi/Properties/launchSettings.json`).
-2. En `CapaPresentacion/DataAccess/API/Call.cs`, las URLs apuntan a `https://localhost:44309/...`. **Unifica el puerto** con el que use realmente tu perfil de ejecución de la API (por ejemplo `https://localhost:7274`) o ejecuta la API con el mismo puerto que espera el cliente.
-3. Ejecuta el proyecto de presentación:
+1. Arranca la API en **`https://localhost:44309`** (por ejemplo perfil **IIS Express** o **YourAppName** en Visual Studio, ver `webapi/Properties/launchSettings.json`). El cliente React usa `VITE_API_URL=https://localhost:44309` en `client/.env`. El *proxy* de Vite reenvía `/api` al mismo puerto si trabajas sin variable de entorno.
+2. Instala dependencias y levanta Vite:
 
 ```bash
-dotnet run --project CapaPresentacion/CapaPresentacion.csproj
+cd client
+npm install
+npm run dev
 ```
+
+3. Abre la URL que muestre la consola (normalmente `http://localhost:5173`).
+
+**Producción / otro host de API:** crea `client/.env` con `VITE_API_URL=https://tu-servidor` (sin barra final). Las peticiones irán a esa base en lugar del proxy.
+
+**Build estático del cliente:**
+
+```bash
+cd client
+npm run build
+```
+
+Salida en `client/dist/`.
 
 ## Conexión por solicitud
 
@@ -101,7 +116,7 @@ La conexión a SQL Server está registrada como **`AddScoped<IDbConnection>`**: 
 
 - **`InvalidOperationException` sobre `DefaultConnection`:** define la cadena en `appsettings*.json` o con variables de entorno (`ConnectionStrings__DefaultConnection`).
 - **No se puede conectar al servidor:** comprueba que el servicio SQL esté iniciado, el nombre de instancia sea correcto y `TrustServerCertificate` / certificados encajen con tu política (sobre todo en entornos corporativos).
-- **Cliente WinForms no recibe datos:** revisa firewall, certificado HTTPS de desarrollo (`dotnet dev-certs https --trust`) y que la URL base coincida con la de la API.
+- **Cliente React no recibe datos:** ejecuta la API primero en el mismo puerto que `client/.env` (`44309` por defecto); confía el certificado HTTPS (`dotnet dev-certs https --trust`). Si usas otro puerto (p. ej. Kestrel `7274`), cambia `VITE_API_URL` y el `target` del *proxy* en `client/vite.config.ts`.
 
 ## Licencia y origen
 

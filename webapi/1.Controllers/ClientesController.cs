@@ -18,7 +18,14 @@ public class ClientesController : ControllerBase
         return Ok(clientes);
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("search")]
+    public IActionResult SearchClientes([FromQuery] string? nombre, [FromQuery] string? correoElectronico)
+    {
+        var clientes = _clienteService.SearchClientes(nombre, correoElectronico);
+        return Ok(clientes);
+    }
+
+    [HttpGet("{id:int}")]
     public IActionResult GetCliente(int id)
     {
         var cliente = _clienteService.GetClienteById(id);
@@ -34,7 +41,7 @@ public class ClientesController : ControllerBase
         return CreatedAtAction(nameof(GetCliente), new { id = cliente.Id }, cliente);
     }
 
-    [HttpPut("{id}")]
+    [HttpPut("{id:int}")]
     public IActionResult UpdateCliente(int id, [FromBody] Cliente cliente)
     {
         var existingCliente = _clienteService.GetClienteById(id);
@@ -46,7 +53,7 @@ public class ClientesController : ControllerBase
         return NoContent();
     }
 
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:int}")]
     public IActionResult DeleteCliente(int id)
     {
         var cliente = _clienteService.GetClienteById(id);
@@ -57,10 +64,4 @@ public class ClientesController : ControllerBase
         return NoContent();
     }
 
-    [HttpGet("search")]
-    public IActionResult SearchClientes([FromQuery] string nombre, [FromQuery] string correoElectronico)
-    {
-        var clientes = _clienteService.SearchClientes(nombre, correoElectronico);
-        return Ok(clientes);
-    }
 }

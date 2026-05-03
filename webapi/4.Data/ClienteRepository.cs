@@ -49,21 +49,32 @@ WHERE Id = @Id";
 
     public IEnumerable<Cliente> SearchClientes(string? nombre = null, string? correoElectronico = null)
     {
+        nombre = string.IsNullOrWhiteSpace(nombre) ? null : nombre.Trim();
+        correoElectronico = string.IsNullOrWhiteSpace(correoElectronico) ? null : correoElectronico.Trim();
+
         var searchQuery = "SELECT Id, Nombre, Edad, Direccion, CorreoElectronico FROM Cliente WHERE 1 = 1";
-        if (!string.IsNullOrEmpty(nombre))
+        if (nombre is not null)
         {
-            searchQuery += " AND Nombre LIKE @Nombre";
+            searchQuery += " AND Nombre LIKE @Nombre ESCAPE N'\\'";
         }
 
-        if (!string.IsNullOrEmpty(correoElectronico))
+        if (correoElectronico is not null)
         {
-            searchQuery += " AND CorreoElectronico LIKE @CorreoElectronico";
+            searchQuery += " AND CorreoElectronico LIKE @CorreoElectronico ESCAPE N'\\'";
         }
 
         return _dbConnection.Query<Cliente>(searchQuery, new
         {
-            Nombre = string.IsNullOrEmpty(nombre) ? null : $"%{nombre}%",
-            CorreoElectronico = string.IsNullOrEmpty(correoElectronico) ? null : $"%{correoElectronico}%"
+            Nombre = nombre is null ? null : $"%{EscapeLike(nombre)}%",
+            CorreoElectronico = correoElectronico is null ? null : $"%{EscapeLike(correoElectronico)}%"
         });
+    }
+
+    private static string EscapeLike(string value)
+    {
+        return value.Replace("\\", "\\\\", StringComparison.Ordinal)
+            .Replace("%", "\\%", StringComparison.Ordinal)
+            .Replace("_", "\\_", StringComparison.Ordinal)
+            .Replace("[", "\\[", StringComparison.Ordinal);
     }
 }
