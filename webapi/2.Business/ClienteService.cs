@@ -18,7 +18,7 @@
         return _clienteRepository.GetClientes();
     }
 
-    public Cliente GetClienteById(int id)
+    public Cliente? GetClienteById(int id)
     {
         return _clienteRepository.GetClienteById(id);
     }
@@ -34,7 +34,7 @@
         _clienteRepository.DeleteCliente(id);
     }
 
-    public IEnumerable<Cliente> SearchClientes(string nombre = null, string correoElectronico = null)
+    public IEnumerable<Cliente> SearchClientes(string? nombre = null, string? correoElectronico = null)
     {
         return _clienteRepository.SearchClientes(nombre, correoElectronico);
     }
