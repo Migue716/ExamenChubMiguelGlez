@@ -29,11 +29,11 @@ Capas en la API (orden conceptual):
 
 La API lee **`ConnectionStrings:DefaultConnection`** desde `webapi/appsettings.json` o `webapi/appsettings.Development.json`.
 
-Por defecto se usa **LocalDB** y una base llamada `ExamenChub`:
+Por defecto se usa **LocalDB** y una base llamada `ExamenChub` (cadena alineada con un perfil tipo SSMS: cifrado activo y `TrustServerCertificate=False`; si falla la conexión local, prueba `TrustServerCertificate=True`):
 
 ```json
 "ConnectionStrings": {
-  "DefaultConnection": "Server=(localdb)\\MSSQLLocalDB;Database=ExamenChub;Trusted_Connection=True;TrustServerCertificate=True"
+  "DefaultConnection": "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=ExamenChub;Integrated Security=True;Persist Security Info=False;Pooling=False;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Application Name=\"SQL Server Management Studio\";Command Timeout=0"
 }
 ```
 
